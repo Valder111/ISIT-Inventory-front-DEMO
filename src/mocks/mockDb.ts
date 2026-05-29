@@ -41,7 +41,7 @@ function seedDb(): DemoDb {
 
   return {
     users,
-    sessionUserId: 1,
+    sessionUserId: null,
     types: typesSeed as EquipmentCategory[],
     models: modelsSeed as EquipmentModel[],
     locations: locationsSeed as Location[],
