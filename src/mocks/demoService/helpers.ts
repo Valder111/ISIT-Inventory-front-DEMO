@@ -1,3 +1,4 @@
+import { staticAssetUrl } from '../../shared/lib/staticAssetUrl'
 import type { MeResponse } from '../../shared/api/auth'
 import type { EquipmentInstance, EquipmentModel } from '../../shared/api/equipment'
 import type { PlatformDocument } from '../../shared/api/documents'
@@ -109,5 +110,6 @@ export function userPublic(u: { id: number; username: string; email: string; rol
 }
 
 export function resolveImgUrl(img?: string) {
-  return presignIfKey(img) ?? (img?.startsWith('/static/') ? img : undefined)
+  const resolved = presignIfKey(img) ?? (img?.startsWith('/static/') ? img : undefined)
+  return resolved ? staticAssetUrl(resolved) : undefined
 }

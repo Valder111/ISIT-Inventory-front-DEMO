@@ -6,6 +6,7 @@ import type { Ticket, TicketItem } from '../shared/api/tickets'
 import type { WriteOff } from '../shared/api/writeoffs'
 
 import { clearAllObjects } from './demoStorage'
+import { hydrateImg } from './hydrate'
 import usersSeed from '../shared/mocks/data/users.json'
 import typesSeed from '../shared/mocks/data/types.json'
 import modelsSeed from '../shared/mocks/data/models.json'
@@ -87,7 +88,7 @@ export function currentMe(): MeResponse | null {
   const u = db.users.find((x) => x.id === db.sessionUserId)
   if (!u) return null
   const { password: _pw, ...me } = u
-  return me
+  return hydrateImg(me)
 }
 
 export function loginByCredentials(login: string, password: string): { ok: true; me: MeResponse } | { ok: false } {
@@ -98,7 +99,7 @@ export function loginByCredentials(login: string, password: string): { ok: true;
   if (u.password !== password) return { ok: false }
   setDb({ ...db, sessionUserId: u.id })
   const { password: _pw, ...me } = u
-  return { ok: true, me }
+  return { ok: true, me: hydrateImg(me) }
 }
 
 export function logout() {
@@ -116,7 +117,7 @@ export function patchMe(patch: Partial<Pick<MeResponse, 'username' | 'email' | '
   users[idx] = updated
   setDb({ ...db, users })
   const { password: _pw, ...me } = updated
-  return me
+  return hydrateImg(me)
 }
 
 /** Сброс демо-БД: localStorage + кэш; IndexedDB — отдельно через resetDemoFiles(). */
@@ -136,13 +137,16 @@ export async function resetDemo() {
 
 export function listUsers(): Array<Pick<MeResponse, 'id' | 'username' | 'email' | 'role' | 'img_url' | 'is_active'>> {
   const db = getDb()
-  return db.users.map(({ password: _pw, ...u }) => ({
-    id: u.id,
-    username: u.username,
-    email: u.email,
-    role: u.role as UserRole,
-    img_url: u.img_url,
-    is_active: u.is_active,
-  }))
+  return db.users.map(({ password: _pw, ...u }) => {
+    const hydrated = hydrateImg(u)
+    return {
+      id: hydrated.id,
+      username: hydrated.username,
+      email: hydrated.email,
+      role: hydrated.role as UserRole,
+      img_url: hydrated.img_url,
+      is_active: hydrated.is_active,
+    }
+  })
 }
 
